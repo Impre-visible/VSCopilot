@@ -1,28 +1,8 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const axios = require('axios');
 const jsdom = require("jsdom");
 const https = require('https');
-/*
-const oauth = require('axios-oauth-client');
-const tokenProvider = require('axios-token-interceptor');
 
-
-const getOwnerCredentials = oauth.client(axios.create(), {
-    url: 'https://stackoverflow.com/oauth/access_token',
-    client_id: '23031',
-    client_secret: 'yabxjcApKEczmsSXoYQG8g((',
-    code: '6v7gSZ4fs9Y1PULOKFzkEA))',
-    redirect_uri: "https://stackexchange.com"
-})
-
-const instance = axios.create();
-instance.interceptors.request.use(
-    oauth.interceptor(tokenProvider, getOwnerCredentials)
-);
-
-*/
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const agent = new https.Agent({
     rejectUnauthorized: false
