@@ -42,7 +42,7 @@ Two way :
 
 ## Remerciements
 
-Merci à Trax et Symbiosis pour leur aide. Ce projet n'existerait pas sans eux !
+Thanks to Trax and Symbiosis for their help. This project would not exist without them!
 
 -----------------------------------------------------------------------------------------------------------
 
