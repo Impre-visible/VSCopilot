@@ -3,6 +3,10 @@
 
 VSCopilot is an extension aimed at facilitating developers, while waiting to have access to Github Copilot.
 
+## Download
+
+https://marketplace.visualstudio.com/manage/publishers/vscopilot/extensions/vscopilot/hub?_a=acquisition
+
 # Usage
 
 ## How to use it ?
