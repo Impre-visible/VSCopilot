@@ -143,9 +143,11 @@ const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "
 function activate(context) {
     let VSCodeExtension = vscode.extensions.all
 
+    let extensionName = "MS-CEINTL.vscode-language-pack";
     VSCodeExtension.forEach(extension => {
-        if (extension["id"].startsWith("MS-CEINTL.vscode-language-pack")) {
-            VSCodeLanguage = extension["id"].substring(31)
+        if (extension.id.startsWith(extensionName)) {
+            VSCodeLanguage = extension.id.replace(extensionName, "");
+            console.log(extension.id)
         }
     })
     console.log(sentences[VSCodeLanguage][1]);
