@@ -11,6 +11,7 @@ const STORAGE_KEY = 'stackexchange_token';
 let token;
 let extensionContext;
 let server;
+let VSCodeLanguage = "us";
 
 /**
  * Configurations.
@@ -19,6 +20,48 @@ let server;
 let STACK_EXCHANGE_APP_ID = '23031', // '*** YOUR APP ID (CLIENT ID) ***',
     STACK_EXCHANGE_APP_SECRET = 'yabxjcApKEczmsSXoYQG8g((', //'*** YOUR APP SECRET (CLIENT SECRET) ***',
     STACK_EXCHANGE_APP_KEY = 'MAsTBc4ad47BAQJOnCiZWQ((';
+
+let sentences = {
+    'fr': ["Tu peux fermer la page maintenant!", "VSCopilot est lancé!", "Veuillez ouvrir un fichier pour utiliser VSCopilot!", "Vous n'etes pas sur un commentaire de language connu !",
+        "Clique ici pour lancer la recherche !"
+    ],
+    'us': ["You can close the page now!", "VSCopilot is launched!", "Please open a file to use VSCopilot!", "You are not on a known language comment!",
+        "Click here to start the search!"
+    ],
+    'es': ["Ya puedes cerrar la página.", "¡Se lanza VSCopilot!", "¡Por favor, abra un archivo para utilizar VSCopilot!", "¡No está en un comentario de idioma conocido!",
+        "Haga clic aquí para iniciar la búsqueda!"
+    ],
+    'de': ["Sie können die Seite jetzt schließen!", "VSCopilot ist gestartet!", "Bitte öffnen Sie eine Datei, um VSCopilot zu verwenden!", "Sie befinden sich nicht auf einem Kommentar mit bekannter Sprache!",
+        "Klicke hier, um die Suche zu starten!"
+    ],
+    'it': ["Ora puoi chiudere la pagina!", "VSCopilot è stato lanciato!", "Si prega di aprire un file per utilizzare VSCopilot!", "Non sei su un commento in una lingua conosciuta!",
+        "Clicca qui per iniziare la ricerca!"
+    ],
+    'zh-hans': ["你现在可以关闭该页面了!", "VSCopilot启动了!", "请打开文件以使用VSCopilot!", "你不是在一个已知的语言评论!",
+        "点击这里开始搜索!"
+    ],
+    'ja': ["これでページを閉じることができます", "VSCopilotが発売されました", "VSCopilotを使用するには、ファイルを開いてください", "既知の言語コメントではありません",
+        "検索を開始するにはここをクリック"
+    ],
+    'ru': ["Теперь вы можете закрыть страницу!", "VSCopilot запущен!", "Пожалуйста, откройте файл, чтобы использовать VSCopilot!", "Вы не находитесь на известном языковом комментарии!",
+        "Нажмите здесь, чтобы начать поиск!"
+    ],
+    'pt-br': ["Você pode fechar a página agora!", "VSCopilot é lançado!", "Favor abrir um arquivo para usar o VSCopilot!", "Você não está em um comentário em um idioma conhecido!",
+        "Clique aqui para iniciar a busca!"
+    ],
+    'pl': ["Teraz możesz zamknąć stronę!", "VSCopilot został uruchomiony!", "Aby korzystać z VSCopilota, należy otworzyć plik!", "Nie masz komentarza w znanym języku!",
+        "Kliknij tutaj, aby rozpocząć poszukiwania!"
+    ],
+    'cs': ["Nyní můžete stránku zavřít!", "VSCopilot je spuštěn!", "Otevřete prosím soubor pro použití VSCopilot!", "Nejste na známém jazykovém komentáři!",
+        "Klikněte zde a začněte hledat!"
+    ],
+    'hu': ["Most már bezárhatja az oldalt!", "A VSCopilot elindult!", "A VSCopilot használatához nyisson meg egy fájlt!", "Ön nem egy ismert nyelvi hozzászóláson van!",
+        "Kattintson ide a keresés megkezdéséhez!"
+    ],
+    'bg': ["Вече можете да затворите страницата!", "VSCopilot е стартиран!", "Моля, отворете файл, за да използвате VSCopilot!", "Не сте в коментар на известен език!",
+        "Кликнете тук, за да започнете търсенето!"
+    ],
+}
 
 function authentication() {
     return new Promise(async(resolve, reject) => {
@@ -71,7 +114,7 @@ function authentication() {
 
         app.get('/auth/stack-exchange/callback', passport.authenticate('stack-exchange', { failureRedirect: '/auth/stack-exchange' }),
             function(req, res) {
-                res.send("You can close this tab.");
+                res.send(sentences[VSCodeLanguage][0]);
             });
 
         server = app.listen(3000);
@@ -98,10 +141,17 @@ const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "
 
 
 function activate(context) {
+    let VSCodeExtension = vscode.extensions.all
 
-    console.log('VSCopilot est lancé!');
+    VSCodeExtension.forEach(extension => {
+        if (extension["id"].startsWith("MS-CEINTL.vscode-language-pack")) {
+            VSCodeLanguage = extension["id"].substring(31)
+        }
+    })
+    console.log(sentences[VSCodeLanguage][1]);
+
+
     extensionContext = context;
-
     //Récupération du token
     token = context.workspaceState.get(STORAGE_KEY, undefined);
 
@@ -110,7 +160,7 @@ function activate(context) {
         const editor = vscode.window.activeTextEditor;
 
         if (!editor) {
-            vscode.window.showErrorMessage("Veuillez ouvrir un fichier pour utiliser VSCopilot");
+            vscode.window.showErrorMessage(sentences[VSCodeLanguage][2]);
             return
         }
 
@@ -147,11 +197,15 @@ function activate(context) {
                 text = text.slice(0, -3);
             }
         } else {
-            vscode.window.showErrorMessage("Vous n'etes pas sur un commentaire de language connu !");
+            vscode.window.showErrorMessage(sentences[VSCodeLanguage][3]);
         }
 
         while (text.startsWith(" ")) {
             text = text.replace(" ", "");
+        }
+
+        while (text.startsWith("\n")) {
+            text = text.replace("\n", "");
         }
 
         // get real extension for tags search
@@ -162,7 +216,7 @@ function activate(context) {
 
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     statusBarItem.text = "VSCopilot";
-    statusBarItem.tooltip = "Clique ici pour lancer la recherche";
+    statusBarItem.tooltip = sentences[VSCodeLanguage][4];
     statusBarItem.command = "vscopilot.openCopilot";
     statusBarItem.show();
     context.subscriptions.push(disposable);

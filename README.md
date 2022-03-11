@@ -3,10 +3,6 @@
 
 VSCopilot is an extension aimed at facilitating developers, while waiting to have access to Github Copilot.
 
-## Download
-
-https://marketplace.visualstudio.com/manage/publishers/vscopilot/extensions/vscopilot/hub?_a=acquisition
-
 # Usage
 
 ## How to use it ?
@@ -22,8 +18,7 @@ Two way :
     ```
     Press the VSCopilot button
     ```    
-    ![Usage Button](images/usageButton.gif)
-
+    ![Usage Button](images/usageButton.gif) 
 
 ## Release Notes
 
@@ -48,6 +43,7 @@ Two way :
 ## Remerciements
 
 Thanks to Trax and Symbiosis for their help. This project would not exist without them!
+
 
 -----------------------------------------------------------------------------------------------------------
 

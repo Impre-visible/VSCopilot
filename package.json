@@ -3,11 +3,15 @@
     "displayName": "VSCopilot",
     "_author": "Imprevisible",
     "description": "",
-    "publisher": "imprevisible",
+    "publisher": "VSCopilot",
     "icon": "images/logo.png",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.64.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Impre-visible/VSCopilot.git"
     },
     "categories": [
         "Other"
@@ -17,12 +21,10 @@
     ],
     "main": "./extension.js",
     "contributes": {
-        "commands": [
-            {
-                "command": "vscopilot.openCopilot",
-                "title": "Open Copilot"
-            }
-        ]
+        "commands": [{
+            "command": "vscopilot.openCopilot",
+            "title": "Open Copilot"
+        }]
     },
     "scripts": {
         "lint": "eslint .",
@@ -45,6 +47,7 @@
         "axios": "^0.26.0",
         "axios-oauth-client": "^1.4.4",
         "axios-token-interceptor": "^0.2.0",
+        "exec": "^0.2.1",
         "express": "^4.17.3",
         "https": "^1.0.0",
         "jsdom": "^19.0.0",
