@@ -36,6 +36,7 @@ Two way :
 ### 0.0.2
 
  - Added more requests (now 5k)
+ - System of translate (Support 13 speak languages)
 
 ### 0.0.1
 
