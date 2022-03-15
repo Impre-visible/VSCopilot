@@ -43,6 +43,10 @@ Two way :
  - Nom you can use button in StatusBar to do the search
  - Only for comments
 
+## Links
+
+[VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=VSCopilot.vscopilot)
+[Github](https://github.com/Impre-visible/VSCopilot/)
 
 ## Remerciements
 
