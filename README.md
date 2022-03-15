@@ -22,7 +22,6 @@ Two way :
 
 ## Release Notes
 
- - Increase numbers of requests
  - Patch some errors you can get
 
 ## To Do
