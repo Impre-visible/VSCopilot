@@ -23,10 +23,15 @@ Two way :
 ## Release Notes
 
  - Increase numbers of requests
+ - Patch some errors you can get
 
 ## To Do
 
  - Add function analyze
+
+### 0.0.3
+
+ - Patch a bug, when question is imprecise
 
 ### 0.0.2
 
