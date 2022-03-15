@@ -13,6 +13,7 @@ let extensionContext;
 let server;
 let VSCodeLanguage = "us";
 
+
 /**
  * Configurations.
  */
@@ -23,43 +24,43 @@ let STACK_EXCHANGE_APP_ID = '23031', // '*** YOUR APP ID (CLIENT ID) ***',
 
 let sentences = {
     'fr': ["Tu peux fermer la page maintenant!", "VSCopilot est lancé!", "Veuillez ouvrir un fichier pour utiliser VSCopilot!", "Vous n'etes pas sur un commentaire de language connu !",
-        "Clique ici pour lancer la recherche !"
+        "Clique ici pour lancer la recherche !", "Votre recherche est imprécise. Veuillez la reformuler !"
     ],
     'us': ["You can close the page now!", "VSCopilot is launched!", "Please open a file to use VSCopilot!", "You are not on a known language comment!",
-        "Click here to start the search!"
+        "Click here to start the search!", "Your search is imprecise. Please reformulate it!" // US
     ],
     'es': ["Ya puedes cerrar la página.", "¡Se lanza VSCopilot!", "¡Por favor, abra un archivo para utilizar VSCopilot!", "¡No está en un comentario de idioma conocido!",
-        "Haga clic aquí para iniciar la búsqueda!"
+        "Haga clic aquí para iniciar la búsqueda!", "Su búsqueda es imprecisa. Por favor, reformúlelo." // Espagnol
     ],
     'de': ["Sie können die Seite jetzt schließen!", "VSCopilot ist gestartet!", "Bitte öffnen Sie eine Datei, um VSCopilot zu verwenden!", "Sie befinden sich nicht auf einem Kommentar mit bekannter Sprache!",
-        "Klicke hier, um die Suche zu starten!"
+        "Klicke hier, um die Suche zu starten!", "Ihre Suche ist unpräzise. Bitte formulieren Sie sie neu!" // Allemand
     ],
     'it': ["Ora puoi chiudere la pagina!", "VSCopilot è stato lanciato!", "Si prega di aprire un file per utilizzare VSCopilot!", "Non sei su un commento in una lingua conosciuta!",
-        "Clicca qui per iniziare la ricerca!"
+        "Clicca qui per iniziare la ricerca!", "La tua ricerca è imprecisa. Per favore, riformulalo!" // Italien
     ],
     'zh-hans': ["你现在可以关闭该页面了!", "VSCopilot启动了!", "请打开文件以使用VSCopilot!", "你不是在一个已知的语言评论!",
-        "点击这里开始搜索!"
+        "点击这里开始搜索!", "你的搜索是不精确的。请重新制定!" // Chinois simplifié
     ],
     'ja': ["これでページを閉じることができます", "VSCopilotが発売されました", "VSCopilotを使用するには、ファイルを開いてください", "既知の言語コメントではありません",
-        "検索を開始するにはここをクリック"
+        "検索を開始するにはここをクリック", "検索が不正確です。ぜひ、再製造してください" // Japon
     ],
     'ru': ["Теперь вы можете закрыть страницу!", "VSCopilot запущен!", "Пожалуйста, откройте файл, чтобы использовать VSCopilot!", "Вы не находитесь на известном языковом комментарии!",
-        "Нажмите здесь, чтобы начать поиск!"
+        "Нажмите здесь, чтобы начать поиск!", "Ваш поиск неточен. Пожалуйста, измените формулировку!" // Russe
     ],
     'pt-br': ["Você pode fechar a página agora!", "VSCopilot é lançado!", "Favor abrir um arquivo para usar o VSCopilot!", "Você não está em um comentário em um idioma conhecido!",
-        "Clique aqui para iniciar a busca!"
+        "Clique aqui para iniciar a busca!", "Sua busca é imprecisa. Reformulem-na, por favor!" // Portugais Bresilien
     ],
     'pl': ["Teraz możesz zamknąć stronę!", "VSCopilot został uruchomiony!", "Aby korzystać z VSCopilota, należy otworzyć plik!", "Nie masz komentarza w znanym języku!",
-        "Kliknij tutaj, aby rozpocząć poszukiwania!"
+        "Kliknij tutaj, aby rozpocząć poszukiwania!", "Twoje wyszukiwanie jest nieprecyzyjne. Proszę przeformułować ten produkt!" // Polonais
     ],
     'cs': ["Nyní můžete stránku zavřít!", "VSCopilot je spuštěn!", "Otevřete prosím soubor pro použití VSCopilot!", "Nejste na známém jazykovém komentáři!",
-        "Klikněte zde a začněte hledat!"
+        "Klikněte zde a začněte hledat!", "Vaše hledání je nepřesné. Prosím, přeformulujte ji!" // Tcheque
     ],
     'hu': ["Most már bezárhatja az oldalt!", "A VSCopilot elindult!", "A VSCopilot használatához nyisson meg egy fájlt!", "Ön nem egy ismert nyelvi hozzászóláson van!",
-        "Kattintson ide a keresés megkezdéséhez!"
+        "Kattintson ide a keresés megkezdéséhez!", "A keresése pontatlan. Kérem, fogalmazza újra!" // Hongrois
     ],
     'bg': ["Вече можете да затворите страницата!", "VSCopilot е стартиран!", "Моля, отворете файл, за да използвате VSCopilot!", "Не сте в коментар на известен език!",
-        "Кликнете тук, за да започнете търсенето!"
+        "Кликнете тук, за да започнете търсенето!", "Търсенето ви е неточно. Моля, преформулирайте го!" // Bulgare
     ],
 }
 
@@ -143,7 +144,7 @@ const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "
 function activate(context) {
     let VSCodeExtension = vscode.extensions.all
 
-    let extensionName = "MS-CEINTL.vscode-language-pack";
+    let extensionName = "MS-CEINTL.vscode-language-pack-";
     VSCodeExtension.forEach(extension => {
         if (extension.id.startsWith(extensionName)) {
             VSCodeLanguage = extension.id.replace(extensionName, "");
@@ -242,33 +243,45 @@ async function openCopilot(language, sentence) {
     const doc = vscode.workspace.openTextDocument({
         language: language
     });
-
     let resp = await axios.get(path, { httpsAgent: agent });
     let json = resp.data;
+    let canResponse;
     const posts = json.items;
-    for (let i = 0; i < posts.length; i++) {
-        if (posts[i]["is_answered"] == true && posts[i]["accepted_answer_id"] !== undefined) {
-            let id = posts[i]["accepted_answer_id"];
-            const answer = `https://api.stackexchange.com/2.3/answers/${id}?order=desc&sort=activity&site=stackoverflow&filter=!nKzQURF6Y5&access_token=${token}&key=${STACK_EXCHANGE_APP_KEY}`;
-            let reponse = await axios.get(answer);
-            let jsonresp = reponse.data;
-            let response = jsonresp.items[0].body;
-            const dom = new JSDOM(response);
-            reponse = "/*\n" + dom.window.document.querySelector("code").textContent + "*/\r\n";
-            responses.push(reponse);
+    if (posts.length != 0) {
+        for (let i = 0; i < posts.length; i++) {
+            if (posts[i]["is_answered"] == true && posts[i]["accepted_answer_id"] !== undefined) {
+                let id = posts[i]["accepted_answer_id"];
+                const answer = `https://api.stackexchange.com/2.3/answers/${id}?order=desc&sort=activity&site=stackoverflow&filter=!nKzQURF6Y5&access_token=${token}&key=${STACK_EXCHANGE_APP_KEY}`;
+                let reponse = await axios.get(answer);
+                let jsonresp = reponse.data;
+                let response = jsonresp.items[0].body;
+                const dom = new JSDOM(response);
+                try {
+                    reponse = "\n" + dom.window.document.querySelector("code").textContent + "\r\n";
+                    responses.push(reponse);
+                    canResponse = "True"
+                } catch (e) {
+                    vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
+                    canResponse = "False"
+                }
+            }
         }
+    } else {
+        vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
+        canResponse = "False"
     }
-
-    let trueResponse = getResponses(responses);
-    vscode.window.showTextDocument(doc, {
-        viewColumn: vscode.ViewColumn.Beside,
-        preview: true,
-        preserveFocus: true,
-    }).then(e => {
-        e.edit(edit => {
-            edit.insert(new vscode.Position(0, 0), trueResponse);
+    if (canResponse == "True") {
+        let trueResponse = getResponses(responses);
+        vscode.window.showTextDocument(doc, {
+            viewColumn: vscode.ViewColumn.Beside,
+            preview: true,
+            preserveFocus: true,
+        }).then(e => {
+            e.edit(edit => {
+                edit.insert(new vscode.Position(0, 0), trueResponse);
+            });
         });
-    });
+    }
 }
 
 function getResponses(list) {
