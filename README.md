@@ -76,6 +76,7 @@ Two way :
 ## Links
 
 [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=VSCopilot.vscopilot)
+or
 [Github](https://github.com/Impre-visible/VSCopilot/)
 
 ## Remerciements
