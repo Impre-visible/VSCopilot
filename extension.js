@@ -134,7 +134,7 @@ const { JSDOM } = jsdom;
 
 let statusBarItem;
 let responses = [];
-const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "typescript", "go": "go" };
+const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "typescript", "go": "go", "cpp": "c++", "cs": "c#", "css": "css", "dart": "dart", "fs": "f#", "fsi": "f#", "fsx": "f#", "fsscript": "f#", "html": "html", "htm": "html", "java": "java", "jl": "julia", "less": "less", "php": "php", "ps1": "powershell", "scss": "scss", "sql": "tsql" };
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -148,7 +148,6 @@ function activate(context) {
     VSCodeExtension.forEach(extension => {
         if (extension.id.startsWith(extensionName)) {
             VSCodeLanguage = extension.id.replace(extensionName, "");
-            console.log(extension.id)
         }
     })
     console.log(sentences[VSCodeLanguage][1]);
@@ -181,24 +180,79 @@ function activate(context) {
         let text = "";
 
         // remove comments str
-        if (line.startsWith("//")) {
+        if (line.startsWith("//")) { // Single line JS/TS/C/C++/C#/Dart/Java comment
             text = line.slice(2);
-        } else if (line.startsWith("/*")) {
+        } else if (line.startsWith("///")) { // Single line F# comment
+            text = line.slice(3);
+        } else if (line.startsWith("<!--")) { // Single line HTML comment
+            text = line.slice(4);
+            if (text.endsWith(" -->")) {
+                text = text.slice(0, -4);
+            } else if (text.endsWith("-->")) {
+                text = text.slice(0, -3);
+            }
+        } else if (line.startsWith("/*")) { // Multi line JS/TS/C/C++/C#/CSS/Dart/Java comment
             text = line.slice(2);
             if (text.endsWith(" */")) {
                 text = text.slice(0, -3);
             } else if (text.endsWith("*/")) {
                 text = text.slice(0, -2);
             }
-        } else if (line.startsWith("#")) {
+        } else if (line.startsWith("#=")) { // Multi line Julia comment
+            text = line.slice(2);
+            if (text.endsWith(" =#")) {
+                text = text.slice(0, -3);
+            } else if (text.endsWith("=#")) {
+                text = text.slice(0, -2);
+            }
+        } else if (line.startsWith("<#")) { // Multi line Powershell comment
+            text = line.slice(2);
+            if (text.endsWith(" #>")) {
+                text = text.slice(0, -3);
+            } else if (text.endsWith("#>")) {
+                text = text.slice(0, -2);
+            }
+        } else if (line.startsWith("#")) { // Single line Py/Powershell comment
             text = line.slice(1);
-        } else if (line.startsWith('"""')) {
+        } else if (line.startsWith("--")) { // Single line TSQL comment
+            text = line.slice(2);
+        } else if (line.startsWith('"""')) { // Multi line Py comment
             text = line.slice(3);
             if (text.endsWith(' """')) {
                 text = text.slice(0, -4);
             } else if (text.endsWith('"""')) {
                 text = text.slice(0, -3);
             }
+        } else if (line.startsWith("def ")) { // basic Py function
+            text = line.slice(4);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("async def ")) { // async PyY function
+            text = line.slice(10);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("function ")) { // JS/TS function
+            text = line.slice(9);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("async function ")) { // async JS/TS function
+            text = line.slice(15);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("func ")) { // function GO
+            text = line.slice(5);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
         } else {
             vscode.window.showErrorMessage(sentences[VSCodeLanguage][3]);
         }
@@ -259,18 +313,18 @@ async function openCopilot(language, sentence) {
                 try {
                     reponse = "\n" + dom.window.document.querySelector("code").textContent + "\r\n";
                     responses.push(reponse);
-                    canResponse = "True"
+                    canResponse = true
                 } catch (e) {
                     vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
-                    canResponse = "False"
+                    canResponse = false
                 }
             }
         }
     } else {
         vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
-        canResponse = "False"
+        canResponse = false
     }
-    if (canResponse == "True") {
+    if (canResponse == true) {
         let trueResponse = getResponses(responses);
         vscode.window.showTextDocument(doc, {
             viewColumn: vscode.ViewColumn.Beside,

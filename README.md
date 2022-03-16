@@ -22,11 +22,41 @@ Two way :
 
 ## Release Notes
 
- - Patch some errors you can get
+ - Added multiple languages compatibility 17/23
+   - C ❌
+   - C++ ✅
+   - C# ✅
+   - CSS ✅
+   - Dart ✅
+   - F# ✅
+   - Go ✅
+   - HTML ✅
+   - Java ✅
+   - Javascript ✅
+   - Julia ✅
+   - Kotlin ❌
+   - Less ✅
+   - Lua ❌
+   - Perl ❌
+   - PHP ✅
+   - Python ✅
+   - Powershell ✅
+   - R ❌
+   - Ruby ❌
+   - Rust ❌
+   - SCSS ✅
+   - T-SQL ✅
+   - Typescript ✅
 
 ## To Do
 
- - Add function analyze
+ - Add function analyze for every languages
+
+
+### 0.0.4
+
+ - Now you can analyse function (not for all languages, it will come in futur update)
+ - More languages compatibility (now 17 languages instead of 4)
 
 ### 0.0.3
 
