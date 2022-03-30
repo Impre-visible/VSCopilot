@@ -22,36 +22,42 @@ Two way :
 
 ## Release Notes
 
- - Added multiple languages compatibility 17/23
+ - Deleted multiple languages compatibility 2/24
    - C ❌
-   - C++ ✅
-   - C# ✅
-   - CSS ✅
-   - Dart ✅
-   - F# ✅
-   - Go ✅
-   - HTML ✅
-   - Java ✅
+   - C++ ❌
+   - C# ❌
+   - CSS ❌
+   - Dart ❌
+   - F# ❌
+   - Go ❌
+   - HTML ❌
+   - Java ❌
    - Javascript ✅
-   - Julia ✅
+   - Julia ❌
    - Kotlin ❌
-   - Less ✅
+   - Less ❌
    - Lua ❌
    - Perl ❌
-   - PHP ✅
+   - PHP ❌
    - Python ✅
-   - Powershell ✅
+   - Powershell ❌
    - R ❌
    - Ruby ❌
    - Rust ❌
-   - SCSS ✅
-   - T-SQL ✅
-   - Typescript ✅
-
+   - SCSS ❌
+   - T-SQL ❌
+   - Typescript ❌
+   
+ - Development of my own AI API
 ## To Do
 
- - Add function analyze for every languages
+ - Add preprocessing to more languages
 
+### 0.1.1
+
+ - Now a real pre-processing IA is behind the API, we dont use Stackoverflow
+ - Saddly, only Python and Javascript are usable
+ - The preprocessing AI is not perfect so be nice 😀.
 
 ### 0.0.4
 

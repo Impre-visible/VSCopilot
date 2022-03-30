@@ -5,7 +5,7 @@
     "description": "",
     "publisher": "VSCopilot",
     "icon": "images/logo.png",
-    "version": "0.0.4",
+    "version": "0.1.1",
     "engines": {
         "vscode": "^1.64.0"
     },

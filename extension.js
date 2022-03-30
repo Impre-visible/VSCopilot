@@ -1,26 +1,12 @@
 const vscode = require('vscode');
 const axios = require('axios');
-const jsdom = require("jsdom");
 const https = require('https');
-const express = require('express');
-const passport = require('passport');
-const StackExchangeStrategy = require('passport-stack-exchange').Strategy;
-const open = require('open');
-const STORAGE_KEY = 'stackexchange_token';
 
-let token;
-let extensionContext;
-let server;
 let VSCodeLanguage = "us";
-
-
-/**
- * Configurations.
- */
-
-let STACK_EXCHANGE_APP_ID = '23031', // '*** YOUR APP ID (CLIENT ID) ***',
-    STACK_EXCHANGE_APP_SECRET = 'yabxjcApKEczmsSXoYQG8g((', //'*** YOUR APP SECRET (CLIENT SECRET) ***',
-    STACK_EXCHANGE_APP_KEY = 'MAsTBc4ad47BAQJOnCiZWQ((';
+let resp
+    /**
+     * Configurations.
+     */
 
 let sentences = {
     'fr': ["Tu peux fermer la page maintenant!", "VSCopilot est lancé!", "Veuillez ouvrir un fichier pour utiliser VSCopilot!", "Vous n'etes pas sur un commentaire de language connu !",
@@ -64,76 +50,12 @@ let sentences = {
     ],
 }
 
-function authentication() {
-    return new Promise(async(resolve, reject) => {
-        let timeout = setTimeout(() => {
-            reject();
-            server.close();
-        }, 60000);
-
-        /*
-         Passport session setup
-         */
-        passport.serializeUser(function(user, done) {
-            done(null, user);
-        });
-
-        passport.deserializeUser(function(obj, done) {
-            done(null, obj);
-        });
-
-        /*
-         Use the StackExchangeStrategy within Passport
-         */
-        passport.use(new StackExchangeStrategy({
-                clientID: STACK_EXCHANGE_APP_ID,
-                clientSecret: STACK_EXCHANGE_APP_SECRET,
-                callbackURL: 'http://127.0.0.1:3000/auth/stack-exchange/callback',
-                stackAppsKey: STACK_EXCHANGE_APP_KEY,
-                scope: 'no_expiry',
-                site: 'stackoverflow'
-            },
-            function(accessToken, refreshToken, profile, done) {
-                console.log("Token :", accessToken);
-                resolve(accessToken);
-                clearTimeout(timeout);
-
-                process.nextTick(function() {
-                    server.close();
-                    return done(null, profile);
-                });
-            }
-        ));
-
-        /**
-         * Configure Express
-         */
-        let app = express();
-        app.use(passport.initialize());
-
-        app.get('/auth/stack-exchange', passport.authenticate('stack-exchange'));
-
-        app.get('/auth/stack-exchange/callback', passport.authenticate('stack-exchange', { failureRedirect: '/auth/stack-exchange' }),
-            function(req, res) {
-                res.send(sentences[VSCodeLanguage][0]);
-            });
-
-        server = app.listen(3000);
-
-        open('http://127.0.0.1:3000/auth/stack-exchange');
-
-
-    });
-}
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const agent = new https.Agent({
     rejectUnauthorized: false
 });
-const { JSDOM } = jsdom;
 
 let statusBarItem;
-let responses = [];
 const languages = { "js": "javascript", "py": "python", "pyw": "python", "ts": "typescript", "go": "go", "cpp": "c++", "cs": "c#", "css": "css", "dart": "dart", "fs": "f#", "fsi": "f#", "fsx": "f#", "fsscript": "f#", "html": "html", "htm": "html", "java": "java", "jl": "julia", "less": "less", "php": "php", "ps1": "powershell", "scss": "scss", "sql": "tsql" };
 
 /**
@@ -152,10 +74,6 @@ function activate(context) {
     })
     console.log(sentences[VSCodeLanguage][1]);
 
-
-    extensionContext = context;
-    //Récupération du token
-    token = context.workspaceState.get(STORAGE_KEY, undefined);
 
     let disposable = vscode.commands.registerCommand('vscopilot.openCopilot', async() => {
         // Verify if user is in a project
@@ -229,7 +147,7 @@ function activate(context) {
                 text = text.slice(0, -1);
             }
             text = text.slice(0, -1);
-        } else if (line.startsWith("async def ")) { // async PyY function
+        } else if (line.startsWith("async def ")) { // async Py function
             text = line.slice(10);
             while (text.endsWith("(") == false) {
                 text = text.slice(0, -1);
@@ -253,6 +171,33 @@ function activate(context) {
                 text = text.slice(0, -1);
             }
             text = text.slice(0, -1);
+        } else if (line.startsWith("void ")) { // function C++/Dart
+            text = line.slice(5);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("public static ")) { // function C# for static
+            text = line.slice(14);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("public async ")) { // function C# for async
+            text = line.slice(13);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
+        } else if (line.startsWith("let ")) { // function F#
+            text = line.slice(4);
+            while (text.endsWith("(") == false) {
+                text = text.slice(0, -1);
+            }
+            while (text.endsWith(" ") == false) {
+                text = text.slice(0, -1);
+            }
+            text = text.slice(0, -1);
         } else {
             vscode.window.showErrorMessage(sentences[VSCodeLanguage][3]);
         }
@@ -264,11 +209,11 @@ function activate(context) {
         while (text.startsWith("\n")) {
             text = text.replace("\n", "");
         }
-
-        // get real extension for tags search
+        let replaced = text.split(' ').join('%20')
+            // get real extension for tags search
         let realExtension = languages[extension];
 
-        await openCopilot(realExtension, text);
+        await openCopilot(realExtension, replaced);
     });
 
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
@@ -284,68 +229,18 @@ function activate(context) {
 function deactivate() {}
 
 async function openCopilot(language, sentence) {
-    try {
-        if (!token) {
-            token = await authentication();
-            extensionContext.workspaceState.update(STORAGE_KEY, token);
-        }
-    } catch (err) { return; }
-
-    // search in stackoverflow
-    const path = `https://api.stackexchange.com/2.3/search?order=desc&sort=activity&tagged=${language}&intitle=${sentence}&site=stackoverflow&access_token=${token}&key=${STACK_EXCHANGE_APP_KEY}`;
+    const editor = vscode.window.activeTextEditor;
+    // request to the api
+    const path = `https://vscopilot.chevrier.cf/api/${language}/${sentence}/`;
     console.log(path)
-    const doc = vscode.workspace.openTextDocument({
-        language: language
-    });
-    let resp = await axios.get(path, { httpsAgent: agent });
+    resp = ""
+    resp = await axios.get(path, { httpsAgent: agent });
     let json = resp.data;
-    let canResponse;
-    const posts = json.items;
-    if (posts.length != 0) {
-        for (let i = 0; i < posts.length; i++) {
-            if (posts[i]["is_answered"] == true && posts[i]["accepted_answer_id"] !== undefined) {
-                let id = posts[i]["accepted_answer_id"];
-                const answer = `https://api.stackexchange.com/2.3/answers/${id}?order=desc&sort=activity&site=stackoverflow&filter=!nKzQURF6Y5&access_token=${token}&key=${STACK_EXCHANGE_APP_KEY}`;
-                let reponse = await axios.get(answer);
-                let jsonresp = reponse.data;
-                let response = jsonresp.items[0].body;
-                const dom = new JSDOM(response);
-                try {
-                    reponse = "\n" + dom.window.document.querySelector("code").textContent + "\r\n";
-                    responses.push(reponse);
-                    canResponse = true
-                } catch (e) {
-                    vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
-                    canResponse = false
-                }
-            }
-        }
-    } else {
-        vscode.window.showErrorMessage(sentences[VSCodeLanguage][5]);
-        canResponse = false
-    }
-    if (canResponse == true) {
-        let trueResponse = getResponses(responses);
-        vscode.window.showTextDocument(doc, {
-            viewColumn: vscode.ViewColumn.Beside,
-            preview: true,
-            preserveFocus: true,
-        }).then(e => {
-            e.edit(edit => {
-                edit.insert(new vscode.Position(0, 0), trueResponse);
-            });
-        });
-    }
-}
-
-function getResponses(list) {
-    let array2 = []
-    list.forEach(element => {
-        if (element.includes("\n")) {
-            array2.push(element + "\n\n")
-        }
-    })
-    return array2.join("")
+    let response = json.response;
+    editor.edit(editBuilder => {
+        editBuilder.insert(editor.selection.active, `\n${response}`);
+    });
+    editor.document.save();
 }
 
 module.exports = {
